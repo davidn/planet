@@ -1,4 +1,3 @@
 * Input objects from file "name mass x y vx vy static?"
-* Compute body_attract_to for every nonstatic on every other
 * getopts for filename of input
 * output to "name.orbit" for each body

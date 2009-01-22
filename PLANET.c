@@ -11,7 +11,6 @@
 #define tmax 3e7
 #define G 6.673e-11
 #define square(a) ((a)*(a))
-#define MOVE_SUN 0
 /* All measurements in SI units */
 
 typedef double * vector;
@@ -55,16 +54,20 @@ typedef struct
 	double mass;
 	vector x;
 	vector v;
+	char * name;
+	char is_static;
 } body;
 
-body * body_new(double mass, vector x, vector v)
+body * body_new(char * name, double mass, vector x, vector v, char is_static)
 {
 	body * self = malloc(sizeof(body));
+	self->name = name;
 	self->mass = mass;
 	self->x = calloc(2,sizeof(double));
 	memcpy(self->x,x,2*sizeof(double));
 	self->v = calloc(2,sizeof(double));
 	memcpy(self->v,v,2*sizeof(double));
+	self->is_static = is_static;
 	return self;
 }
 
@@ -72,6 +75,7 @@ void body_free(body * self)
 {
 	vector_free(self->x);
 	vector_free(self->v);
+	/*free(self->name); /* Don't do for non dynamic strings! */
 	free(self);
 }
 
@@ -90,44 +94,43 @@ void body_update_v(body * self, vector acceleration)
 void body_attract_to(body * self, body * neighbour)
 {
 	vector a = vector_new(0,0);
-#if MOVE_SUN
 	vector r = vector_difference(self->x,neighbour->x);
-#else
-	vector r = self->x;
-#endif
 	double modr = vector_magnitude(r);
 	double magnitude = G * neighbour->mass /
 		square(modr);
 	a[0] = -1 * r[0] * magnitude / modr;
 	a[1] = -1 * r[1] * magnitude / modr;
-	printf(" %f %f", a[0], a[1]);
+	/*printf(" %f %f", a[0], a[1]);*/
 	body_update_v(self,a);
-#if MOVE_SUN
 	vector_free(r);
-#endif
 	vector_free(a);
 }
 
 int main(int argc, char ** argv)
 {
-	body * sun = body_new(1.98892e30,vector_new(0,0),vector_new(0,0));
-	body * earth = body_new(5.9742e24, vector_new(0,1.5e11),vector_new(3e4,0));
-	int t;
-
+	body * bodies[] = {
+		body_new("sun",1.98892e30,vector_new(0,0),vector_new(0,0), 1),
+		body_new("earth",5.9742e24, vector_new(0,1.5e11),vector_new(3e4,0),0)
+	};
+	int no_bodies = 2;
+	long int t;
+	int i,j;
 	for (t = 0; t<tmax; t += dt )
 	{
-		printf("%f %f %f %f", earth->x[0],earth->x[1], earth->v[0], earth->v[1]);
-		body_attract_to(earth, sun);
-#if MOVE_SUN
-		body_attract_to(sun, earth);
-#endif
-		body_update_x(earth);
-#if MOVE_SUN
-		body_update_x(sun);
-#endif
+		for (i=0;i<no_bodies; i++)
+		{
+			printf("%f %f ", bodies[i]->x[0],bodies[i]->x[1]);
+			if (! bodies[i]->is_static)
+			{
+				for(j=0;j<no_bodies;j++)
+					if(i != j)
+						body_attract_to(bodies[i], bodies[j]);
+				body_update_x(bodies[i]);
+			}
+		}
 		printf("\n");
 	}
-	body_free(earth);
-	body_free(sun);
+	body_free(bodies[0]);
+	body_free(bodies[1]);
 	return 0;
 }
