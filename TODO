@@ -1,3 +1,2 @@
-* Input objects from file "name mass x y vx vy static?"
 * getopts for filename of input
 * output to "name.orbit" for each body

@@ -10,6 +10,7 @@
 #define dt 100
 #define tmax 3e7
 #define G 6.673e-11
+#define MAX_BODIES 5
 #define square(a) ((a)*(a))
 /* All measurements in SI units */
 
@@ -55,7 +56,7 @@ typedef struct
 	vector x;
 	vector v;
 	char * name;
-	char is_static;
+	int is_static;
 } body;
 
 body * body_new(char * name, double mass, vector x, vector v, char is_static)
@@ -63,10 +64,8 @@ body * body_new(char * name, double mass, vector x, vector v, char is_static)
 	body * self = malloc(sizeof(body));
 	self->name = name;
 	self->mass = mass;
-	self->x = calloc(2,sizeof(double));
-	memcpy(self->x,x,2*sizeof(double));
-	self->v = calloc(2,sizeof(double));
-	memcpy(self->v,v,2*sizeof(double));
+	self->x = x;
+	self->v = v;
 	self->is_static = is_static;
 	return self;
 }
@@ -108,13 +107,23 @@ void body_attract_to(body * self, body * neighbour)
 
 int main(int argc, char ** argv)
 {
-	body * bodies[] = {
-		body_new("sun",1.98892e30,vector_new(0,0),vector_new(0,0), 1),
-		body_new("earth",5.9742e24, vector_new(0,1.5e11),vector_new(3e4,0),0)
-	};
-	int no_bodies = 2;
+	FILE * input = stdin;
+	body * bodies[MAX_BODIES];
+	int no_bodies;
 	long int t;
 	int i,j;
+	for (no_bodies=0; !feof(input) && no_bodies<MAX_BODIES ;no_bodies++)
+	{
+		bodies[no_bodies] = body_new(NULL,0,vector_new(0,0),vector_new(0,0),0);
+		fscanf(input, "%as %lf %lf %lf %lf %lf %d\n",
+				&bodies[no_bodies]->name,
+				&bodies[no_bodies]->mass,
+				&bodies[no_bodies]->x[0],
+				&bodies[no_bodies]->x[1],
+				&bodies[no_bodies]->v[0],
+				&bodies[no_bodies]->v[1],
+				&bodies[no_bodies]->is_static);
+	}
 	for (t = 0; t<tmax; t += dt )
 	{
 		for (i=0;i<no_bodies; i++)

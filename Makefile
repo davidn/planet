@@ -4,8 +4,8 @@ clean:
 	-rm *.o
 	-rm PLANET
 
-data: PLANET
-	./PLANET > data
+data: PLANET bodies
+	./PLANET < bodies > data
 
 plot: data plot.gp
 	./plot.gp
