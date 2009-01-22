@@ -3,11 +3,13 @@ all: PLANET
 clean:
 	-rm *.o
 	-rm PLANET
+	-rm .data-stamp
 
-data: PLANET bodies
-	./PLANET < bodies > data
+.data-stamp: PLANET bodies
+	./PLANET < bodies
+	touch .data-stamp
 
-plot: data plot.gp
+plot: .data-stamp plot.gp
 	./plot.gp
 
 %: %.c

@@ -109,6 +109,7 @@ int main(int argc, char ** argv)
 {
 	FILE * input = stdin;
 	body * bodies[MAX_BODIES];
+	FILE * outputs[MAX_BODIES];
 	int no_bodies;
 	long int t;
 	int i,j;
@@ -123,12 +124,19 @@ int main(int argc, char ** argv)
 				&bodies[no_bodies]->v[0],
 				&bodies[no_bodies]->v[1],
 				&bodies[no_bodies]->is_static);
+		outputs[no_bodies] = fopen(bodies[no_bodies]->name,"w");
+		if (outputs[no_bodies]==NULL)
+		{
+			printf("Could not open %s for writing", bodies[no_bodies]->name);
+			exit(1);
+		}
+
 	}
 	for (t = 0; t<tmax; t += dt )
 	{
 		for (i=0;i<no_bodies; i++)
 		{
-			printf("%f %f ", bodies[i]->x[0],bodies[i]->x[1]);
+			fprintf(outputs[i],"%f\t%f\n", bodies[i]->x[0],bodies[i]->x[1]);
 			if (! bodies[i]->is_static)
 			{
 				for(j=0;j<no_bodies;j++)
@@ -137,8 +145,8 @@ int main(int argc, char ** argv)
 				body_update_x(bodies[i]);
 			}
 		}
-		printf("\n");
 	}
+
 	body_free(bodies[0]);
 	body_free(bodies[1]);
 	return 0;
