@@ -74,7 +74,7 @@ void body_free(body * self)
 {
 	vector_free(self->x);
 	vector_free(self->v);
-	/*free(self->name); /* Don't do for non dynamic strings! */
+	free(self->name); /* Don't do for non dynamic strings! */
 	free(self);
 }
 
