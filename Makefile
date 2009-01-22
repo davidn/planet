@@ -9,8 +9,8 @@ clean:
 	./PLANET < bodies
 	touch .data-stamp
 
-plot: .data-stamp plot.gp
-	./plot.gp
+plot.gif: .data-stamp plot.gp loop.gp
+	./plot.gp > plot.gif
 
 %: %.c
 	gcc -Wall -lm -funroll-loops -g $< -o $@
