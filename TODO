@@ -1,0 +1,5 @@
+* Input objects from file "name mass x y vx vy static?"
+* Compute body_attract_to for every nonstatic on every other
+* Compute body_update_x in mainloop rather than body_attract_to for all nonstatic
+* getopts for filename of input
+* output to "name.orbit" for each body
