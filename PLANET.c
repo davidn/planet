@@ -146,8 +146,7 @@ int main(int argc, char ** argv)
 			}
 		}
 	}
-
-	body_free(bodies[0]);
-	body_free(bodies[1]);
+	for (i=0; i<no_bodies ; i ++)
+		body_free(bodies[i]);
 	return 0;
 }
