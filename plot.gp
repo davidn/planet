@@ -4,12 +4,12 @@ set term gif animate
 unset border
 set zeroaxis 7
 set size square
-size=1.5e11
+size=6.7e6
 set xrange [-size:size]
 set yrange [-size:size]
 
-length = 100000
-da = 10000
+length = 100
+da = 100
 a = 0
 max = 3e5
 
