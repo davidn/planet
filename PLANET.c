@@ -102,7 +102,6 @@ void body_attract_to(body * self, body * neighbour)
 	a[1] = -1 * r[1] * magnitude / modr;
 	printf(" %f %f", a[0], a[1]);
 	body_update_v(self,a);
-	body_update_x(self);
 #if MOVE_SUN
 	vector_free(r);
 #endif
@@ -121,6 +120,10 @@ int main(int argc, char ** argv)
 		body_attract_to(earth, sun);
 #if MOVE_SUN
 		body_attract_to(sun, earth);
+#endif
+		body_update_x(earth);
+#if MOVE_SUN
+		body_update_x(sun);
 #endif
 		printf("\n");
 	}
