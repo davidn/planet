@@ -1,8 +1,10 @@
 PLANET - An Orbit Simulation
 (c) 2009, David Newgas <dn271@cam.ac.uk>
 
+Usage: PLANET [-f infile] [-i iterations]
+
 PLANET simulates orbits for given initial conditions, which must be specified on
-stdin.  The format is each body has a line such as:
+infile, or stdin if unspecified.  The format is each body has a line such as:
 
 body-name   x-position  y-position  x-velocity  y-velocity  is-static
 

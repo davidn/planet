@@ -25,14 +25,15 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
+#include <unistd.h>
 
 #define dt 100
-#define tmax 3e7
 #define G 6.673e-11
 #define MAX_BODIES 5
 #define square(a) ((a)*(a))
 /* All measurements in SI units */
 
+long long tmax = 3e7;
 typedef double * vector;
 
 vector vector_new(double x, double y)
@@ -136,7 +137,32 @@ int main(int argc, char ** argv)
 	FILE * outputs[MAX_BODIES];
 	int no_bodies;
 	long int t;
-	int i,j;
+	int i,j,opt;
+	
+	while ((opt=getopt (argc,argv,"f:i:h"))!=-1)
+	{
+		switch (opt)
+		{
+			case 'f':
+				input = fopen(optarg,"r");
+				if (input == NULL)
+			{
+				printf("Could not open %s for reading\n",optarg);
+				exit(1);
+			}
+				break;
+			case 'i':
+				tmax = atoll(optarg);
+				break;
+			default:
+			fprintf (stderr, "Unrecognised option: %d\n",opt);
+			case '?':
+			case 'h':
+			fprintf(stderr, "Usage: %s [-f infile] [-i iterations]\n",argv[0]);
+			exit(1);
+		}
+	}
+	
 	/* Get bodies from input: */
 	for (no_bodies=0; !feof(input) && no_bodies<MAX_BODIES ;no_bodies++)
 	{

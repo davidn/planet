@@ -4,7 +4,7 @@ clean:
 	-rm *.o PLANET .data-stamp man earth sun moon plot.gif
 
 .data-stamp: PLANET bodies
-	./PLANET < bodies
+	./PLANET -f bodies
 	touch .data-stamp
 
 plot.gif: .data-stamp plot.gp loop.gp
@@ -13,4 +13,4 @@ plot.gif: .data-stamp plot.gp loop.gp
 display: plot.gif
 	animate plot.gif&
 %: %.c
-	gcc -Wall -lm -funroll-loops -g $< -o $@
+	gcc -Werror -Wall -lm -funroll-loops -g $< -o $@
