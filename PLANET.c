@@ -156,7 +156,7 @@ int main(int argc, char ** argv)
 		if (outputs[no_bodies]==NULL)
 		{
 			/* should be done with errno etc */
-			printf("Could not open %s for writing", bodies[no_bodies]->name);
+			printf("Could not open %s for writing\n", bodies[no_bodies]->name);
 			exit(1);
 		}
 
