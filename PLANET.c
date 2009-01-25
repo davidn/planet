@@ -1,5 +1,24 @@
 /*  PLANET - A Orbit Simulation
- * (c) 2009 David Newgas
+ * (c) 2009 David Newgas <dn271@cam.ac.uk>
+ */
+
+/*
+ *  Guide to Source code.
+ *  
+ * This is essentially Euler-style numerical approximation.  There are two 
+ * classes:
+ *
+ * Vector - this is simply a more covienient array of doubles. It has a few
+ * utility functions that are pretty obvious.
+ *
+ * Body - This is the important object - it stores information about each body
+ * in the system.  More importantly, it had body_attract_to, which updates it's
+ * velocity according to the acceleration to the other body.  It is called for 
+ * every body on every other body.  This means out algorithm is O(n^2)
+ * Body also has body_update_x which is called every iteration to move the body.
+ *
+ * We are relying on the linearity of newton's laws by updating velocity immidiately
+ * for every other body.  Otherwise we must keep track of the overall force
  */
 
 #include <stdlib.h>
@@ -66,7 +85,8 @@ body * body_new(char * name, double mass, vector x, vector v, char is_static)
 	self->mass = mass;
 	self->x = x;
 	self->v = v;
-	self->is_static = is_static;
+	self->is_static = is_static;   /* This allows us to save a bit of calculation
+									  on bodies that are static.*/
 	return self;
 }
 
@@ -91,6 +111,10 @@ void body_update_v(body * self, vector acceleration)
 }
 
 void body_attract_to(body * self, body * neighbour)
+/* Here we work out the acceleration (=force/mass) on the body, and then update
+   v
+   Note that we calculate modr and magnitude as they are used mroe than once.  with luck
+	 the compiler will optimise it a bit.*/
 {
 	vector a = vector_new(0,0);
 	vector r = vector_difference(self->x,neighbour->x);
@@ -113,8 +137,12 @@ int main(int argc, char ** argv)
 	int no_bodies;
 	long int t;
 	int i,j;
+	/* Get bodies from input: */
 	for (no_bodies=0; !feof(input) && no_bodies<MAX_BODIES ;no_bodies++)
 	{
+		/* We call body_new before getting the details to save storing it all in
+		 temp variables. NB: %as is using the GNU extension "a" modifier.  Saves
+		 some work and neatness.  it requires the string to be freed.*/
 		bodies[no_bodies] = body_new(NULL,0,vector_new(0,0),vector_new(0,0),0);
 		fscanf(input, "%as %lf %lf %lf %lf %lf %d\n",
 				&bodies[no_bodies]->name,
@@ -127,26 +155,29 @@ int main(int argc, char ** argv)
 		outputs[no_bodies] = fopen(bodies[no_bodies]->name,"w");
 		if (outputs[no_bodies]==NULL)
 		{
+			/* should be done with errno etc */
 			printf("Could not open %s for writing", bodies[no_bodies]->name);
 			exit(1);
 		}
 
 	}
+	/* loop for out iterations */
 	for (t = 0; t<tmax; t += dt )
 	{
 		for (i=0;i<no_bodies; i++)
 		{
+			/* print out details at start to get initial conditions in output */
 			fprintf(outputs[i],"%f\t%f\n", bodies[i]->x[0],bodies[i]->x[1]);
 			if (! bodies[i]->is_static)
 			{
 				for(j=0;j<no_bodies;j++)
 					if(i != j)
-						body_attract_to(bodies[i], bodies[j]);
-				body_update_x(bodies[i]);
+						body_attract_to(bodies[i], bodies[j]); /* Do this on everything */
+				body_update_x(bodies[i]); /* but do this once */
 			}
 		}
 	}
 	for (i=0; i<no_bodies ; i ++)
-		body_free(bodies[i]);
+		body_free(bodies[i]); /* unecessary, but good practice */
 	return 0;
 }

@@ -1,0 +1,16 @@
+PLANET - An Orbit Simulation
+(c) 2009, David Newgas <dn271@cam.ac.uk>
+
+PLANET simulates orbits for given initial conditions, which must be specified on
+stdin.  The format is each body has a line such as:
+
+body-name   x-position  y-position  x-velocity  y-velocity  is-static
+
+those are hopefully self explanitory except for is-static.  This allows you to
+"pin" objects in space.  If it is "1" the body will not experience any forces,
+otherwise set it to "0".  Making objects static saves a bit of cpu, so it is
+worth doing for any really massive bodies.
+
+The values should be in the appopriate SI units - meters and meters per second.
+body-name must not have spaces in it.
+You can specify large numbers as understood by fscanf(3) - eg 3.44e4 .
