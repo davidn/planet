@@ -1,6 +1,6 @@
 #!/usr/bin/gnuplot -persist
 
-set term gif animate size 800x800
+set term gif animate size
 unset border
 set zeroaxis 7
 set size square
