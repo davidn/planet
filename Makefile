@@ -12,8 +12,8 @@ plot.gif: .data-stamp plot.gp loop.gp
 
 archive: planet.tar.gz
 
-planet.tar.gz: PLANET.c bodies plot.gp loop.gp Makefile README TODO
-	tar -zcf planet.tar.gz PLANET.c bodies plot.gp loop.gp Makefile README TODO
+planet.tar.gz: PLANET.c bodies plot.gp loop.gp Makefile README TODO awk
+	tar -zcf planet.tar.gz PLANET.c bodies plot.gp loop.gp Makefile awk README TODO
 
 display: plot.gif
 	gnome-open plot.gif&
