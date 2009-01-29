@@ -221,7 +221,7 @@ int main(int argc, char ** argv)
 			fprintf (stderr, "Unrecognised option: %d\n",opt);
 			case '?':
 			case 'h':
-			fprintf(stderr, "Usage: %s [-f infile] [-s timestep] [-t max_time] [-e | -f]\n",argv[0]);
+			fprintf(stderr, "Usage: %s [-f infile] [-s timestep] [-t max_time] [-e | -l]\n",argv[0]);
 			exit(1);
 		}
 	}
