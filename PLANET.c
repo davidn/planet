@@ -31,9 +31,9 @@
 #define G 6.673e-11
 #define MAX_BODIES 5
 #define square(a) ((a)*(a))
+#define DEFAULT_TMAX 3e7
 /* All measurements in SI units */
 
-long long tmax = 3e7;
 typedef double * vector;
 
 vector vector_new(double x, double y)
@@ -137,6 +137,7 @@ int main(int argc, char ** argv)
 	FILE * outputs[MAX_BODIES];
 	int no_bodies;
 	long int t;
+	long long tmax = DEFAULT_TMAX;
 	int i,j,opt;
 	
 	while ((opt=getopt (argc,argv,"f:i:h"))!=-1)
