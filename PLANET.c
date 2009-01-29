@@ -27,7 +27,6 @@
 #include <math.h>
 #include <unistd.h>
 
-#define dt 100
 #define G 6.673e-11
 #define MAX_BODIES 5
 #define square(a) ((a)*(a))
@@ -99,19 +98,19 @@ void body_free(body * self)
 	free(self);
 }
 
-void body_update_x(body * self)
+void body_update_x(body * self, int dt)
 {
 	self->x[0] += self->v[0] * dt;
 	self->x[1] += self->v[1] * dt;
 }
 
-void body_update_v(body * self, vector acceleration)
+void body_update_v(body * self, int dt, vector acceleration)
 {
 	self->v[0] += acceleration[0] * dt;
 	self->v[1] += acceleration[1] * dt;
 }
 
-void body_attract_to(body * self, body * neighbour)
+void body_attract_to(body * self, int dt, body * neighbour)
 /* Here we work out the acceleration (=force/mass) on the body, and then update
    v
    Note that we calculate modr and magnitude as they are used mroe than once.  with luck
@@ -125,9 +124,63 @@ void body_attract_to(body * self, body * neighbour)
 	a[0] = -1 * r[0] * magnitude / modr;
 	a[1] = -1 * r[1] * magnitude / modr;
 	/*printf(" %f %f", a[0], a[1]);*/
-	body_update_v(self,a);
+	body_update_v(self, dt ,a);
 	vector_free(r);
 	vector_free(a);
+}
+
+void euler_run (long long tmax, int timestep, body * bodies[], FILE * outputs[], int no_bodies)
+{
+	long long t;
+	int i,j;
+	/* loop for out iterations */
+	for (t = 0; t<tmax; t += timestep )
+	{
+		for (i=0;i<no_bodies; i++)
+		{
+			/* print out details at start to get initial conditions in output */
+			fprintf(outputs[i],"%f\t%f\n", bodies[i]->x[0],bodies[i]->x[1]);
+			if (! bodies[i]->is_static)
+			{
+				for(j=0;j<no_bodies;j++)
+					if(i != j)
+						body_attract_to(bodies[i], timestep, bodies[j]); /* Do this on everything */
+				body_update_x(bodies[i], timestep); /* but do this once */
+			}
+		}
+	}
+}
+
+void leapfrog_run (long long tmax, int timestep, body * bodies[], FILE * outputs[], int no_bodies)
+{
+	long long t = 0;
+	int i,j;
+	timestep /= 2;
+	/* loop for out iterations */
+	while ( t<tmax )
+	{
+		for (i=0;i<no_bodies; i++)
+		{
+			/* print out details at start to get initial conditions in output */
+			fprintf(outputs[i],"%f\t%f\n", bodies[i]->x[0],bodies[i]->x[1]);
+			if (! bodies[i]->is_static)
+			{
+				body_update_x(bodies[i],timestep);
+			}
+		}
+		t += timestep;
+		for (i=0;i<no_bodies; i++)
+		{
+			if (! bodies[i]->is_static)
+			{
+				for(j=0;j<no_bodies;j++)
+					if(i != j)
+						body_attract_to(bodies[i], timestep * 2, bodies[j]);
+				body_update_x(bodies[i],timestep);
+			}
+		}
+		t += timestep;
+	}
 }
 
 int main(int argc, char ** argv)
@@ -136,11 +189,12 @@ int main(int argc, char ** argv)
 	body * bodies[MAX_BODIES];
 	FILE * outputs[MAX_BODIES];
 	int no_bodies;
-	long int t;
 	long long tmax = DEFAULT_TMAX;
-	int i,j,opt;
+	int opt;
+	int dt = 100;
+	int method = 1; /* 0=euler, 1=leapfrog */
 	
-	while ((opt=getopt (argc,argv,"f:i:h"))!=-1)
+	while ((opt=getopt (argc,argv,"f:i:helt:s:"))!=-1)
 	{
 		switch (opt)
 		{
@@ -152,14 +206,22 @@ int main(int argc, char ** argv)
 				exit(1);
 			}
 				break;
-			case 'i':
+			case 's':
+				dt = atoi(optarg);
+				break;
+			case 't':
 				tmax = atoll(optarg);
+			case 'e':
+				method = 0;
+				break;
+			case 'l':
+				method = 1;
 				break;
 			default:
 			fprintf (stderr, "Unrecognised option: %d\n",opt);
 			case '?':
 			case 'h':
-			fprintf(stderr, "Usage: %s [-f infile] [-i iterations]\n",argv[0]);
+			fprintf(stderr, "Usage: %s [-f infile] [-s timestep] [-t max_time] [-e | -f]\n",argv[0]);
 			exit(1);
 		}
 	}
@@ -188,23 +250,15 @@ int main(int argc, char ** argv)
 		}
 
 	}
-	/* loop for out iterations */
-	for (t = 0; t<tmax; t += dt )
+	if ( method == 0 )
 	{
-		for (i=0;i<no_bodies; i++)
-		{
-			/* print out details at start to get initial conditions in output */
-			fprintf(outputs[i],"%f\t%f\n", bodies[i]->x[0],bodies[i]->x[1]);
-			if (! bodies[i]->is_static)
-			{
-				for(j=0;j<no_bodies;j++)
-					if(i != j)
-						body_attract_to(bodies[i], bodies[j]); /* Do this on everything */
-				body_update_x(bodies[i]); /* but do this once */
-			}
-		}
+		euler_run( tmax, dt, bodies, outputs, no_bodies);
 	}
-	for (i=0; i<no_bodies ; i ++)
-		body_free(bodies[i]); /* unecessary, but good practice */
+	else
+	{
+		leapfrog_run( tmax, dt, bodies, outputs, no_bodies);
+	}
+	for (; no_bodies > 0 ; no_bodies--)
+		body_free(bodies[no_bodies-1]); /* unecessary, but good practice */
 	return 0;
 }
