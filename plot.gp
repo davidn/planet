@@ -9,8 +9,11 @@ set xrange [-size:size]
 set yrange [-size:size]
 
 length = 100000
-da = 10000
+da = 1000
 a = 0
 max = 3e5
+
+set macros
+plot="`awk -f awk bodies`"
 
 load "loop.gp"
